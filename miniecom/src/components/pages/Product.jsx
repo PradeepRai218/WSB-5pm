@@ -23,17 +23,8 @@ import axios from "axios";
 import { Link, useParams } from "react-router";
 import Loading from "../common/Loading";
 
-const sortOptions = [
-  { name: "Most Popular", href: "#", current: true },
-  { name: "Best Rating", href: "#", current: false },
-  { name: "Newest", href: "#", current: false },
-  { name: "Price: Low to High", href: "#", current: false },
-  { name: "Price: High to Low", href: "#", current: false },
-];
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
+
 
 export default function Product() {
   let [loading, setLoading] = useState(false);
@@ -41,14 +32,14 @@ export default function Product() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  let [categoryFilter, setCategoryFilter] = useState([]);
-
   let [category, setCategory] = useState([]);
   let [brand, setBrand] = useState([]);
   let [product, setProduct] = useState([]);
 
-  let [sorting,setSorting]=useState(null)
-
+  //Filter State
+  let [categoryFilter, setCategoryFilter] = useState([]);
+  let [brandFilter, setbrandFilter] = useState([]);
+  let [sorting, setSorting] = useState(null);
 
   let getCategory = async () => {
     let apiData = await fetch(
@@ -83,7 +74,7 @@ export default function Product() {
           discount_to: null,
           name: null,
           rating: null,
-          brands: null,
+          brands: brandFilter.join(","),
           categories: categoryFilter.join(","), //["womens-shoes","beauty"]  // womens-shoes,beauty
         },
       }
@@ -99,13 +90,16 @@ export default function Product() {
     getBrand();
   }, []);
 
+  //Get Product Call  //categoryFilter, brandFilter, sorting
   useEffect(() => {
     getProducts();
-  }, [categoryFilter,sorting]);
+  }, [categoryFilter, brandFilter, sorting]);
 
+
+  //Url Slug Store in State
   useEffect(() => {
     if (categorySlug) {
-      setCategoryFilter([categorySlug]); //["beauty"]
+      setCategoryFilter([...categoryFilter, categorySlug]); //["beauty"]
     } else {
       setCategoryFilter([]);
     }
@@ -115,6 +109,30 @@ export default function Product() {
 
   // console.log(l.toString()); //"ws","iip"
   //   console.log(l.join("|")); //"ws" | "iip"
+
+  console.log(categoryFilter);
+
+  let getCheckCategoryValue = (e) => {
+    let checkBoxValue = e.target.value;
+    if (e.target.checked) {
+      setCategoryFilter([...categoryFilter, checkBoxValue]);
+    } else {
+      let filterCategory = categoryFilter.filter((v) => v != checkBoxValue);
+
+      setCategoryFilter(filterCategory);
+    }
+  };
+
+  let getCheckBrandValue = (e) => {
+    let checkBoxValue = e.target.value;
+    if (e.target.checked) {
+      setbrandFilter([...brandFilter, checkBoxValue]);
+    } else {
+      let filterbrand = brandFilter.filter((v) => v != checkBoxValue);
+
+      setbrandFilter(filterbrand);
+    }
+  };
 
   return (
     <div className="bg-white">
@@ -167,16 +185,19 @@ export default function Product() {
             </h1>
 
             <div className="flex items-center">
-           
               <div>
-                <select name="" id="" onChange={(e)=>{
-                  setSorting(e.target.value)
-                }}>
+                <select
+                  name=""
+                  id=""
+                  onChange={(e) => {
+                    setSorting(e.target.value);
+                  }}
+                >
                   <option value="">Select</option>
                   <option value="1">Name : A to Z</option>
                   <option value="2">Name : Z to A</option>
                   <option value="3">Price: Low to High</option>
-                   <option value="4">Price: High to Low</option>
+                  <option value="4">Price: High to Low</option>
                 </select>
               </div>
 
@@ -209,13 +230,21 @@ export default function Product() {
                 <h3 className="font-bold text-2xl mb-4">Categories</h3>
                 <ul
                   role="list"
-                  className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
+                  className="space-y-4 h-[250px] overflow-y-scroll border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
                 >
                   {category.map((obj, index) => {
                     return (
                       <li>
+
+                        {/* //categoryFilter ["beauty"].includes("beauty")  */} 
                         {" "}
-                        <input type="checkbox" /> {obj.name}
+                        <input
+                          onChange={getCheckCategoryValue}
+                          type="checkbox"
+                          value={obj.slug}
+                          checked={categoryFilter.includes(obj.slug)}
+                        />
+                        {obj.name}
                       </li>
                     );
                   })}
@@ -224,13 +253,17 @@ export default function Product() {
                 <h3 className="font-bold text-2xl mb-4">Brands</h3>
                 <ul
                   role="list"
-                  className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
+                  className="space-y-4 h-[250px] overflow-y-scroll border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
                 >
                   {brand.map((obj, index) => {
                     return (
                       <li>
                         {" "}
-                        <input type="checkbox" /> {obj.name}
+                        <input type="checkbox" 
+                        onChange={getCheckBrandValue} 
+                        value={obj.slug} 
+                        
+                        /> {obj.name}
                       </li>
                     );
                   })}
@@ -239,30 +272,19 @@ export default function Product() {
 
               {/* Product grid */}
               <div className="lg:col-span-3">
-                {
-                
-                loading ? (
+                {loading ? (
                   <Loading />
-                ) :
-                
-                (
+                ) : (
                   <div className="grid grid-cols-4 gap-5">
-                    {
-                    
-                    product.length >= 1 ? (
+                    {product.length >= 1 ? (
                       product.map((obj, index) => (
                         <ProductCard key={index} data={obj} />
                       ))
-                    ) 
-                    :
-                     (
+                    ) : (
                       <div>No Product Found</div>
-                    )
-                    }
+                    )}
                   </div>
-                )
-                
-                }
+                )}
               </div>
             </div>
           </section>
