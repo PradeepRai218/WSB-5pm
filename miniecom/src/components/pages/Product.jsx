@@ -1,3 +1,5 @@
+import ResponsivePagination from "react-responsive-pagination";
+import "react-responsive-pagination/themes/classic-light-dark.css";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -23,12 +25,8 @@ import axios from "axios";
 import { Link, useParams } from "react-router";
 import Loading from "../common/Loading";
 
-
-
-
 export default function Product() {
   let [loading, setLoading] = useState(false);
-  let { categorySlug } = useParams(); //beauty
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -40,10 +38,14 @@ export default function Product() {
   let [categoryFilter, setCategoryFilter] = useState([]);
   let [brandFilter, setbrandFilter] = useState([]);
   let [sorting, setSorting] = useState(null);
+  let [priceFiter, setPriceFiter] = useState([null, null]);
+  let [rating, setRating] = useState(null);
+  let [currentPage, setCurrentPage] = useState(1);
+  let [totPages, setTotPages] = useState(0);
 
   let getCategory = async () => {
     let apiData = await fetch(
-      `https://wscubetech.co/ecommerce-api/categories.php`
+      `https://wscubetech.co/ecommerce-api/categories.php`,
     );
     let finalData = await apiData.json();
     let { data } = finalData;
@@ -65,23 +67,34 @@ export default function Product() {
       `https://wscubetech.co/ecommerce-api/products.php`,
       {
         params: {
-          page: 1,
+          page: currentPage,
           limit: 12,
           sorting: sorting,
-          price_from: null,
-          price_to: null,
+          price_from: priceFiter[0],
+          price_to: priceFiter[1],
           discount_from: null,
           discount_to: null,
           name: null,
-          rating: null,
+          rating: rating,
           brands: brandFilter.join(","),
           categories: categoryFilter.join(","), //["womens-shoes","beauty"]  // womens-shoes,beauty
         },
-      }
+      },
     );
     let finalData = apiRes.data;
-    let { data } = finalData;
+    let { data, total_pages } = finalData;
+    
+
+    setTotPages(total_pages); // 14
+
+    console.log(data);
+
     setProduct(data);
+    window.scrollTo({
+      top:"200",
+      behavior:"smooth"
+    })
+
     setLoading(false);
   };
 
@@ -93,24 +106,7 @@ export default function Product() {
   //Get Product Call  //categoryFilter, brandFilter, sorting
   useEffect(() => {
     getProducts();
-  }, [categoryFilter, brandFilter, sorting]);
-
-
-  //Url Slug Store in State
-  useEffect(() => {
-    if (categorySlug) {
-      setCategoryFilter([...categoryFilter, categorySlug]); //["beauty"]
-    } else {
-      setCategoryFilter([]);
-    }
-  }, [categorySlug]); //beauty
-
-  // let l=["ws","iip"]
-
-  // console.log(l.toString()); //"ws","iip"
-  //   console.log(l.join("|")); //"ws" | "iip"
-
-  console.log(categoryFilter);
+  }, [categoryFilter, brandFilter, sorting, priceFiter, rating, currentPage]);
 
   let getCheckCategoryValue = (e) => {
     let checkBoxValue = e.target.value;
@@ -235,9 +231,7 @@ export default function Product() {
                   {category.map((obj, index) => {
                     return (
                       <li>
-
-                        {/* //categoryFilter ["beauty"].includes("beauty")  */} 
-                        {" "}
+                        {/* //categoryFilter ["beauty"].includes("beauty")  */}{" "}
                         <input
                           onChange={getCheckCategoryValue}
                           type="checkbox"
@@ -259,15 +253,91 @@ export default function Product() {
                     return (
                       <li>
                         {" "}
-                        <input type="checkbox" 
-                        onChange={getCheckBrandValue} 
-                        value={obj.slug} 
-                        
-                        /> {obj.name}
+                        <input
+                          type="checkbox"
+                          onChange={getCheckBrandValue}
+                          value={obj.slug}
+                        />{" "}
+                        {obj.name}
                       </li>
                     );
                   })}
                 </ul>
+
+                <h3 className="font-bold text-2xl mb-4">Price</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-x-3">
+                    <input
+                      id="0-500"
+                      className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
+                      type="radio"
+                      name="price"
+                      onClick={() => setPriceFiter([0, 500])}
+                    />
+                    <label
+                      htmlFor="0-500"
+                      className="block text-sm/6 font-medium text-gray-900"
+                    >
+                      Rs.0 - Rs.500
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-x-3">
+                    <input
+                      className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
+                      type="radio"
+                      name="price"
+                      onClick={() => setPriceFiter([501, 1000])}
+                    />
+                    <label
+                      htmlFor="501-1000"
+                      className="block text-sm/6 font-medium text-gray-900"
+                    >
+                      Rs.501 - Rs.1000
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-x-3">
+                    <input
+                      className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
+                      type="radio"
+                      name="price"
+                      onClick={() => setPriceFiter([1001, 1500])}
+                    />
+                    <label
+                      htmlFor="1001-1500"
+                      className="block text-sm/6 font-medium text-gray-900"
+                    >
+                      Rs.1001 - Rs.1500
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-x-3">
+                    <input
+                      className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
+                      type="radio"
+                      onClick={() => setPriceFiter([1501, 2500])}
+                      name="price"
+                    />
+                    <label
+                      htmlFor="1501-2500"
+                      className="block text-sm/6 font-medium text-gray-900"
+                    >
+                      Rs.1501 - Rs.2500
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-x-3">
+                    <input
+                      className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
+                      type="radio"
+                      name="price"
+                      onClick={() => setPriceFiter([2501, 50000000])}
+                    />
+                    <label
+                      htmlFor="2501-more"
+                      className="block text-sm/6 font-medium text-gray-900"
+                    >
+                      Rs.2501 and more
+                    </label>
+                  </div>
+                </div>
               </form>
 
               {/* Product grid */}
@@ -285,6 +355,12 @@ export default function Product() {
                     )}
                   </div>
                 )}
+
+                <ResponsivePagination
+                  current={currentPage}
+                  total={totPages}
+                  onPageChange={setCurrentPage}
+                />
               </div>
             </div>
           </section>
