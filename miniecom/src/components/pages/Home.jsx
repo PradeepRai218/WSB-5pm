@@ -1,7 +1,10 @@
 import Footer from "../common/Footer";
 import Header from "../common/Header";
 import aboutImg from "../../assets/images/jodhpur-team.webp" 
+import { useContext } from "react";
+import { MyGlobalContext } from "../context/MainContextFile";
 function Home() {
+  let {cart,setCart}=useContext(MyGlobalContext)
   return (
     <>
  
@@ -9,6 +12,7 @@ function Home() {
       <h2 className="lg:text-[42px] text-white sm:text-3xl text-2xl font-bold text-center">
         Our Product
       </h2>
+      <button className="bg-red-200 p-3" onClick={()=>setCart(cart+1)}>Change Cart</button>
 
       <div className="max-w-[1320px] mx-auto grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-5 mt-5 lg:px-0 px-4 ">
         <ProductItems />

@@ -17,6 +17,13 @@ export default function SideBar() {
             <RiDashboard3Line /> Dashboard{" "}
           </Link>
         </li>
+
+         <li>
+          <Link className="flex items-center gap-2" to={"/color/add"}>
+            {" "}
+            <RiDashboard3Line /> Add Color{" "}
+          </Link>
+        </li>
       </ul>
     </div>
   );

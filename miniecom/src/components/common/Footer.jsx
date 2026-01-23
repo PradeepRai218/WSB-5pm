@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaFacebookF } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa6";
+import { MyGlobalContext } from "../context/MainContextFile";
 
 export default function Footer() {
+ let {cart,setCart} = useContext(MyGlobalContext)
+
+
   return (
     <footer className="bg-primary-color py-10">
+     
+      <button onClick={()=>setCart(cart-1)}>ChangeCart</button>
       <div className="max-w-[1320px] mx-auto grid grid-cols-[30%_20%_20%_auto]">
         <div className="py-10">
           <h2 className="text-[22px] font-semibold text-white mb-5">

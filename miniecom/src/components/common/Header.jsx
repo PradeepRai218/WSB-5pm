@@ -1,9 +1,12 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
+import { MyGlobalContext } from "../context/MainContextFile";
 
 const Header = () => {
-  
+
+   let {cart}  =useContext(MyGlobalContext) //Object //1
+
    
   let [category, setCategory] = useState([]);
 
@@ -21,7 +24,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="hidden lg:block bg-[#F5F7FA] h-[72px]">
+    <header className="hidden sticky top-0 lg:block bg-[#F5F7FA] h-[72px]">
       <div className="px-6 py-4 relative">
         <nav className="flex items-center justify-between">
           {/* Logo */}
@@ -101,15 +104,15 @@ const Header = () => {
           </ul>
 
           {/* CTA Button */}
-          <a href="/post-a-property?type=for_sale" className="ml-6">
+          <Link to="/cart" className="ml-6">
             <button className="flex items-center gap-2 bg-blue-600 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-blue-700 transition">
-              <span>Post Property</span>
+              <span>Cart</span>
 
               <span className="text-xs bg-white text-blue-600 px-2 py-[2px] rounded">
-                Free
+                 { cart.length }
               </span>
             </button>
-          </a>
+          </Link>
         </nav>
       </div>
     </header>

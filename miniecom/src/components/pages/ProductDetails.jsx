@@ -13,9 +13,13 @@ export default function ProductDetails() {
     let finalData = await apiRes.data;
     let { product } = finalData;
 
-    setmainImg(product.image)
+   
+   
 
-    setProductData(product);
+
+
+
+   
   };
 
   useEffect(() => {

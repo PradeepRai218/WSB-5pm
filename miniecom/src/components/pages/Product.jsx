@@ -1,6 +1,9 @@
 import ResponsivePagination from "react-responsive-pagination";
 import "react-responsive-pagination/themes/classic-light-dark.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import Swal from "sweetalert2";
+import "sweetalert2/src/sweetalert2.scss";
 import {
   Dialog,
   DialogBackdrop,
@@ -24,6 +27,7 @@ import {
 import axios from "axios";
 import { Link, useParams } from "react-router";
 import Loading from "../common/Loading";
+import { MyGlobalContext } from "../context/MainContextFile";
 
 export default function Product() {
   let [loading, setLoading] = useState(false);
@@ -83,17 +87,14 @@ export default function Product() {
     );
     let finalData = apiRes.data;
     let { data, total_pages } = finalData;
-    
 
     setTotPages(total_pages); // 14
 
-    console.log(data);
-
     setProduct(data);
     window.scrollTo({
-      top:"200",
-      behavior:"smooth"
-    })
+      top: "200",
+      behavior: "smooth",
+    });
 
     setLoading(false);
   };
@@ -132,6 +133,7 @@ export default function Product() {
 
   return (
     <div className="bg-white">
+      <ToastContainer />
       <div>
         {/* Mobile filter dialog */}
         <Dialog
@@ -371,7 +373,49 @@ export default function Product() {
 }
 
 function ProductCard({ data }) {
-  let { name, price, image, category_name, slug } = data;
+  let { name, price, image, category_name, slug, id } = data;
+  let { cart, setCart } = useContext(MyGlobalContext);
+
+  let addToCart = () => {
+    let myObj = {
+      id,
+      name,
+      price,
+      image,
+      qty: 1,
+    };
+    setCart([...cart, myObj]);
+    toast.success("Item  added in Cart");
+  };
+
+  let removeCart = () => {
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        
+        let finalCart=cart.filter((obj)=>obj.id!=id)
+
+        setCart(finalCart)
+
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
+  };
+
+  let checkMyProductinCart = cart.find((obj) => obj.id == id);
+
   return (
     <div className="bg-neutral-primary-soft block max-w-sm border border-default rounded-base shadow-xs">
       <a href="#">
@@ -398,6 +442,23 @@ function ProductCard({ data }) {
           </svg>
           {category_name}
         </span>
+
+        {checkMyProductinCart ? (
+          <button
+            onClick={removeCart}
+            className="p-2 ms-3 text-white bg-red-700"
+          >
+            Remove Cart
+          </button>
+        ) : (
+          <button
+            onClick={addToCart}
+            className="p-2 ms-3 text-white bg-green-700"
+          >
+            Add to Cart
+          </button>
+        )}
+
         <Link href="#">
           <h5 className="mt-3 mb-6 text-2xl font-semibold tracking-tight text-heading">
             {name}
